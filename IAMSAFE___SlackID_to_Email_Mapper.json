@@ -1,0 +1,203 @@
+{
+  "name": "IAMSAFE - SlackID to Email Mapper",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9841b034-9f77-48fd-a42b-39fcb5231f68",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "user",
+        "operation": "getAll",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        220,
+        0
+      ],
+      "id": "0c0847a1-d185-4e81-8cbc-6d5f5f9da1f7",
+      "name": "Get All Slack Users",
+      "webhookId": "29c2d046-3af5-4bd1-ba61-6459168047e3",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "UOUtOB7BJx33RsZF",
+          "name": "Slack Nick Test oauth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1wpzNsN1LaNumKTi_Ny7PzGREPygoPOCo0bygTPZ96kc",
+          "mode": "list",
+          "cachedResultName": "il_adresses",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596691630,
+          "mode": "list",
+          "cachedResultName": "IL_Address_list",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "slackUserId": "={{ $json.id }}",
+            "Email": "={{ $json.name }}@fullpath.com"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "﻿Display name",
+              "displayName": "﻿Display name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Department",
+              "displayName": "Department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "City",
+              "displayName": "City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "checkSafeStatus",
+              "displayName": "checkSafeStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "checkDateTime",
+              "displayName": "checkDateTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "slackUserId",
+              "displayName": "slackUserId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        0
+      ],
+      "id": "f85d9fbf-9e22-4721-8a4f-6eecb7d3348a",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rysHCoQLqJVOUfBj",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get All Slack Users",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Slack Users": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "51bcf725-26a7-40a3-a773-ca621e204ffd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1e0a255e002edd936f91861dcb4555a8e0e2a5cf8ca3b3cddba604da8d42b97d"
+  },
+  "id": "uLd0J2dDqt2yonUO",
+  "tags": []
+}

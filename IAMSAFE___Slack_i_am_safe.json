@@ -1,0 +1,193 @@
+{
+  "name": "IAMSAFE - Slack i-am-safe",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1wpzNsN1LaNumKTi_Ny7PzGREPygoPOCo0bygTPZ96kc",
+          "mode": "list",
+          "cachedResultName": "il_adresses",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596691630,
+          "mode": "list",
+          "cachedResultName": "IL_Address_list",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "event": "rowUpdate",
+        "options": {
+          "columnsToWatch": [
+            "checkSafeStatus"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0c3d0ab0-2572-4e93-ab22-fc1e56482356",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "SA3T3kIawBc07dwX",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6fa6c8ab-733c-4108-9183-e87be281a1f3",
+              "leftValue": "={{ $json.checkSafeStatus }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "6cf8dd39-0066-44a3-ab4f-56f6591580f5",
+      "name": "Check if Should Notify"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        460,
+        200
+      ],
+      "id": "2fa3e0de-b28e-43d7-ace7-dd0021563ee7",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const name = item.json[\"﻿Display name\"];\n  const email = item.json.Email;\n  const city = item.json.City;\n\n  const blocks = [];\n\n  blocks.push({\n    type: \"section\",\n    text: {\n      type: \"mrkdwn\",\n      text: `*ARE YOU OK AND SAFE?*\\n\\nWe have detected a rocket explosion near your location in: *${city}*\nPlease click *\"I'm safe!\"* below to tell us you are okay. If you need something, please reach out to your manager or HR.\\nWe are here for you. - The Fullpath HR team`\n    }\n  });\n\n  blocks.push({\n    type: \"actions\",\n    elements: [\n      {\n        type: \"button\",\n        text: {\n          type: \"plain_text\",\n          text: \"I'm Safe!\",\n          emoji: true\n        },\n        style: \"primary\",\n        value: `${email}`,\n        action_id: \"safe_button_action\"\n      }\n    ]\n  });\n\n  return {\n    json: {\n      blocks\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        -80
+      ],
+      "id": "6596ed0c-f874-492e-8669-94ea364accf8",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "={{ $('Check if Should Notify').item.json.slackUserId }}",
+          "mode": "id"
+        },
+        "messageType": "block",
+        "blocksUi": "={{ { \"blocks\": $json.blocks } }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        700,
+        -80
+      ],
+      "id": "739e0583-51f7-42af-8c33-6a93b5bff27c",
+      "name": "Slack",
+      "webhookId": "3ad47bf6-1223-4a84-9321-e100a3505457",
+      "credentials": {
+        "slackApi": {
+          "id": "XsNtNr8ZuaiXpMZ1",
+          "name": "Slack API  -Shahar v1"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check if Should Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if Should Notify": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0ceaa9ba-37e4-4eeb-a61b-916c4a673201",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1e0a255e002edd936f91861dcb4555a8e0e2a5cf8ca3b3cddba604da8d42b97d"
+  },
+  "id": "uZ1wHc1GARFFp4eO",
+  "tags": []
+}

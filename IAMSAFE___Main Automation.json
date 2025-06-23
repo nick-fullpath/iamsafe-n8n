@@ -1,0 +1,865 @@
+{
+  "name": "IAMSAFE - Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://www.ynet.co.il/Integration/StoryRss1854.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -760,
+        0
+      ],
+      "id": "9eb3860f-f119-4e71-b15f-f10626185d49",
+      "name": "RSS Feed Trigger"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        300
+      ],
+      "id": "7db06b06-d015-44c5-a137-21f0550b5646",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        700,
+        260
+      ],
+      "id": "e2084841-3ea4-4b1a-9f9c-0611f57670ba",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a6ec4a1c-44dd-422f-8285-7ce27ce5f85b",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "נפילה",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "f51c9fe3-4001-4792-b257-f5177d5c89c0",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "פגיעה",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "09ef051d-7eb8-42f1-8486-73b3c9819faf",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "נפילות",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "86e085e8-2494-486d-883b-5e994ee073a4",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "פגיעות",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -460,
+        0
+      ],
+      "id": "2fe04ceb-15cb-4872-95fd-8172ff5e4e51",
+      "name": "Check if message contains trigger word"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7bbd2d37-0538-473c-b2c2-4d31ebfd06c8",
+              "leftValue": "={{ $json.output.isCorrect }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        -20
+      ],
+      "id": "7aa60121-fd1e-46ce-986d-ec149de29151",
+      "name": "check if its Correct message"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1wpzNsN1LaNumKTi_Ny7PzGREPygoPOCo0bygTPZ96kc",
+          "mode": "list",
+          "cachedResultName": "il_adresses",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596691630,
+          "mode": "list",
+          "cachedResultName": "IL_Address_list",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "City",
+              "lookupValue": "={{ $json.cityName }}"
+            }
+          ]
+        },
+        "combineFilters": "OR",
+        "options": {
+          "returnFirstMatch": false
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1400,
+        -20
+      ],
+      "id": "adf9b038-a9e1-4d98-aa8f-f0f786d8515d",
+      "name": "Google Sheets",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rysHCoQLqJVOUfBj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const blocks = [];\n\nblocks.push({\n  type: \"section\",\n  text: {\n    type: \"mrkdwn\",\n    text: \"📢 *Direct Hit in an Employee Location, Message sent to:*\"\n  }\n});\n\nlet currentText = \"\";\n\nitems.forEach((item, index) => {\n  const data = item.json;\n  currentText += `👤 *${data[\"﻿Display name\"]}* | 🏢 ${data.Department} | 📍 ${data.City} | 📧 ${data.Email}\\n`;\n\n  // Flush every 100 employees (for Slack max 50 blocks)\n  if ((index + 1) % 40 === 0 || index === items.length - 1) {\n    blocks.push({\n      type: \"section\",\n      text: {\n        type: \"mrkdwn\",\n        text: currentText\n      }\n    });\n    blocks.push({ type: \"divider\" });\n    currentText = \"\";\n  }\n});\n\nreturn [{ json: { blocks } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2780,
+        -300
+      ],
+      "id": "6888dcea-2650-4346-8288-884306935cb9",
+      "name": "Aggregate all results and prepare slack"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1f741020-381b-4a14-8ffa-c66cc0d3dc5b",
+              "leftValue": "={{ $json.isEmpty }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1860,
+        -20
+      ],
+      "id": "33cf9bec-def5-4923-a819-b0efa15d67ec",
+      "name": "Check if any employee live in a hit area"
+    },
+    {
+      "parameters": {
+        "jsCode": "const blocks = [];\n\nblocks.push({\n  type: \"section\",\n  text: {\n    type: \"mrkdwn\",\n    text: \"📢 *Direct Hit in a City — No Employees in Location*\"\n  }\n});\n\nblocks.push({\n  type: \"section\",\n  text: {\n    type: \"mrkdwn\",\n    text: `🚀 *City hit:* ${$('Loop Over Items').first().json.cityName}\\n✅ No employees reside in this location.`\n  }\n});\n\nreturn [{ json: { blocks } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        200
+      ],
+      "id": "0c1a2530-a991-45d4-bd3d-6b7eeca7ca19",
+      "name": "create a message for no employee live in the area"
+    },
+    {
+      "parameters": {
+        "jsCode": "const isEmpty = items.length === 0 || (items.length === 1 && Object.keys(items[0].json).length === 0);\n\nif (isEmpty) {\n  return [{\n    json: {\n      isEmpty: true\n    }\n  }];\n} else {\n  return items.map(item => {\n    return {\n      json: {\n        ...item.json,\n        isEmpty: false\n      }\n    };\n  });\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1620,
+        -20
+      ],
+      "id": "a6de5908-e3de-4574-9463-0b0c44915645",
+      "name": "isEmpty"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Title: {{ $json.title }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a Hebrew-language RSS title analyzer.\nYour task is to extract the names of cities in Israel mentioned in the title.\nYou will receive a title in Hebrew.\nThe title may include:\n\nFull city names (e.g. \"תל אביב\", \"אשדוד\")\n\nShort initials (e.g. \"ב״ש\", \"ת״א\", \"ר״ג\")\nYou must translate common initials into full city names.\n\nYour output must be in exactly this JSON format:\n{\n  \"isCorrect\": true/false,  \n  \"cityName\": \"comma-separated list of full city names if found, or null\"\n}\n\nRules:\n\n* isCorrect = true only if the title clearly indicates an actual impact, explosion, or hit related to rocket fire or similar (with words like פגיעה, נפילה).\n\n* If no actual event is described, set isCorrect = false.\n\n* For cityName, extract and output only full city names explicitly mentioned in the title.\n\n* Do not try to parse regions (for example: \"גוש דן\", \"שרון\", \"עוטף עזה\") — skip these and do not include them in cityName.\n\n* If no specific city is mentioned, set cityName: null.\n\nCommon city initials to translate:\nת״א → תל אביב\nב״ש → באר שבע\nר״ג → רמת גן\nק״ג → קריית גת\nק״ב → קריית ביאליק\nק״ש → קריית שמונה\n\nExamples:\nTitle: פגיעה ישירה בבת ים ותל אביב\n{\n  \"isCorrect\": true,\n  \"cityName\": \"בת ים, תל אביב\"\n}\n\nTitle: פגיעה ישירה בגוש דן\n{\n  \"isCorrect\": true,\n  \"cityName\": null\n}\n\nTitle: נפילה בגוש דן וב״ש\n{\n  \"isCorrect\": true,\n  \"cityName\": \"באר שבע\"\n}\n\nTitle: פגיעה ישירה בבית בב״ש, ת״א ור״ג\n{\n  \"isCorrect\": true,\n  \"cityName\": \"באר שבע, תל אביב, רמת גן\"\n}\n\nTitle: אזעקה בלבד בשרון — אין נפילה\n{\n  \"isCorrect\": false,\n  \"cityName\": null\n}\nTitle: \"האזעקות נמשכות, דיווחים ראשוניים על נפילות בשפלה ובאזור חיפה\"\n{\n  \"isCorrect\": true,\n  \"cityName\": ״חיפה״\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -20,
+        -20
+      ],
+      "id": "50e4cee1-fd25-4980-937e-95a609fe6413",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -40,
+        240
+      ],
+      "id": "d3e738ef-9140-4f36-8020-f5de0f28f9f6",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "z4NcHnFzA4NAkpuH",
+          "name": "OpenAi account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"isCorrect\":\"string\",\n  \"cityName\":\"string\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        240
+      ],
+      "id": "3f0f5bf4-b355-4a4e-a6b0-99e7487b5cfe",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputString = $input.first().json.output.cityName|| null;\n\nif (!inputString || typeof inputString !== \"string\") {\n  return [];  // no cities — return empty array\n}\n\nconst cities = inputString\n  .split(\",\")\n  .map(city => city.trim())\n  .filter(city => city.length > 0)\n  .map(city => {\n    return {\n      json: {\n        cityName: city\n      }\n    };\n  });\n\nreturn cities;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        860,
+        -20
+      ],
+      "id": "ab29026e-b44a-4f9d-adf8-dd4097ce3d7a",
+      "name": "City List Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1140,
+        -20
+      ],
+      "id": "8de2ca8c-c7b8-462c-b53b-f263a00a7f22",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        -260
+      ],
+      "id": "81bc7b43-fd36-48c5-9d15-df6826e8c4f1",
+      "name": "No Operation, do nothing2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3560,
+        280
+      ],
+      "id": "df07dc76-626c-4b90-a12f-6104b24e4a9d",
+      "name": "No Operation, do nothing3"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0918AFJ2J3",
+          "mode": "id"
+        },
+        "messageType": "block",
+        "blocksUi": "={{ { \"blocks\": $json.blocks } }}",
+        "text": "=",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        3220,
+        0
+      ],
+      "id": "a4400403-7f30-4cae-9bfe-073e9f2cc3a0",
+      "name": "Slack Channel",
+      "webhookId": "383fb01c-7803-496a-8613-397b942f6fc5",
+      "credentials": {
+        "slackApi": {
+          "id": "XsNtNr8ZuaiXpMZ1",
+          "name": "Slack API  -Shahar v1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1wpzNsN1LaNumKTi_Ny7PzGREPygoPOCo0bygTPZ96kc",
+          "mode": "list",
+          "cachedResultName": "il_adresses",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596691630,
+          "mode": "list",
+          "cachedResultName": "IL_Address_list",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Dont send notification for recurring events (minutes)').item.json.Email }}",
+            "checkDateTime": "={{ $json.currentDateTime }}",
+            "checkSafeStatus": "true"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "﻿Display name",
+              "displayName": "﻿Display name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Department",
+              "displayName": "Department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "City",
+              "displayName": "City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "checkSafeStatus",
+              "displayName": "checkSafeStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "checkDateTime",
+              "displayName": "checkDateTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3020,
+        -500
+      ],
+      "id": "aa361042-44a2-4dcc-9cf4-d0589d3e625f",
+      "name": "Update Impacted Employees",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rysHCoQLqJVOUfBj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const referenceDateTime = new Date();\n\nconst output = [];\n\nitems.forEach(item => {\n  const checkDateTime = new Date(item.json.checkDateTime);\n\n  const diffMs = Math.abs(referenceDateTime - checkDateTime);\n  const diffMinutes = Math.round(diffMs / (1000 * 60));\n\n  output.push({\n    json: {\n      ...item.json,\n      diffMinutes\n    }\n  });\n});\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2140,
+        -280
+      ],
+      "id": "85cd452c-3a1f-4eac-a4e1-813c019ac88d",
+      "name": "Check Time Diff"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2780,
+        -80
+      ],
+      "id": "13bf938d-d979-4c58-b093-052bc36d36f9",
+      "name": "No Operation, do nothing4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a42b5222-0fa1-4782-a405-b75531d402ac",
+              "leftValue": "={{ $json.diffMinutes }}",
+              "rightValue": 180,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "9e02442e-72e2-45fd-aae3-37149768f3af",
+              "leftValue": "={{ $json.diffMinutes }}",
+              "rightValue": "null",
+              "operator": {
+                "type": "number",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2420,
+        -280
+      ],
+      "id": "c0d9ee3b-4f7b-4b0f-837e-8135cf36d209",
+      "name": "Dont send notification for recurring events (minutes)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst formatted = now.toISOString().split('.')[0] + '.000Z';\n\nreturn [\n  {\n    json: {\n      currentDateTime: formatted\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2780,
+        -500
+      ],
+      "id": "aee271ac-0631-4c68-aa79-dbaa78ffe10e",
+      "name": "Get Current Date in a Format"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check if message contains trigger word",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if message contains trigger word": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if its Correct message": {
+      "main": [
+        [
+          {
+            "node": "City List Parser",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "isEmpty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate all results and prepare slack": {
+      "main": [
+        [
+          {
+            "node": "Slack Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create a message for no employee live in the area": {
+      "main": [
+        [
+          {
+            "node": "Slack Channel",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "No Operation, do nothing3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if any employee live in a hit area": {
+      "main": [
+        [
+          {
+            "node": "Check Time Diff",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "create a message for no employee live in the area",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "isEmpty": {
+      "main": [
+        [
+          {
+            "node": "Check if any employee live in a hit area",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "check if its Correct message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "City List Parser": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Channel": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Time Diff": {
+      "main": [
+        [
+          {
+            "node": "Dont send notification for recurring events (minutes)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dont send notification for recurring events (minutes)": {
+      "main": [
+        [
+          {
+            "node": "Aggregate all results and prepare slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Current Date in a Format",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Current Date in a Format": {
+      "main": [
+        [
+          {
+            "node": "Update Impacted Employees",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Impacted Employees": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "81c1f7a5-35b4-421d-9cf3-7c6d04135a8b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1e0a255e002edd936f91861dcb4555a8e0e2a5cf8ca3b3cddba604da8d42b97d"
+  },
+  "id": "5Yxq9cL7NNTatp6K",
+  "tags": [
+    {
+      "createdAt": "2025-01-28T11:03:45.941Z",
+      "updatedAt": "2025-01-28T11:03:45.941Z",
+      "id": "yYFxETM2cD1Ce9yA",
+      "name": "DevOps"
+    }
+  ]
+}

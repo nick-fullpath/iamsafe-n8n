@@ -1,0 +1,324 @@
+{
+  "name": "IAMSAFE - Slack Response from User",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c9384b00-8d79-4f75-bb46-15914334e930",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "80451a6f-b8dd-4f95-b4c1-a8b6d80a0037",
+      "name": "Get Response from I-am-safe",
+      "webhookId": "c9384b00-8d79-4f75-bb46-15914334e930"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1wpzNsN1LaNumKTi_Ny7PzGREPygoPOCo0bygTPZ96kc",
+          "mode": "list",
+          "cachedResultName": "il_adresses",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596691630,
+          "mode": "list",
+          "cachedResultName": "IL_Address_list",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "slackUserId": "={{ $json.slackUserId }}",
+            "checkSafeStatus": "FALSE"
+          },
+          "matchingColumns": [
+            "slackUserId"
+          ],
+          "schema": [
+            {
+              "id": "﻿Display name",
+              "displayName": "﻿Display name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Department",
+              "displayName": "Department",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "City",
+              "displayName": "City",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "checkSafeStatus",
+              "displayName": "checkSafeStatus",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "checkDateTime",
+              "displayName": "checkDateTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "slackUserId",
+              "displayName": "slackUserId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        480,
+        0
+      ],
+      "id": "cc9b73bd-4cc3-4627-ad57-5e0e99600918",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rysHCoQLqJVOUfBj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $json.body;\nconst payload = JSON.parse(body.payload);\n\nconst slackUserId = payload.user.id;\nconst slackUsername = payload.user.username;\nconst email = payload.actions[0].value;\n\nconst channel = payload.container.channel_id;\nconst ts = payload.container.message_ts;\n\nreturn [\n  {\n    json: {\n      slackUserId,\n      slackUsername,\n      email,\n      channel,\n      ts\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "8bf3065c-713b-469b-98fe-da16c4cc6e29",
+      "name": "Parse the Payload"
+    },
+    {
+      "parameters": {
+        "jsCode": "const blocks = [];\n\nblocks.push({\n  type: \"section\",\n  text: {\n    type: \"mrkdwn\",\n    text: `✅ *Thank you!*\\nWe are happy to hear you are safe. 🙏\\nIf you need anything, please feel free to reach out to us.\\nThe Fullpath HR team`\n  }\n});\n\nreturn [{ json: { blocks } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        -120
+      ],
+      "id": "a886d25e-f18e-4bfe-a59a-2c08b3c25a40",
+      "name": "Reply Message to User"
+    },
+    {
+      "parameters": {
+        "jsCode": "const slackUsername = $('Parse the Payload').first().json.slackUsername || \"user\";\nconst slackUserId = $('Parse the Payload').first().json.slackUserId;\nconst email = $('Parse the Payload').first().json.email;\n\nconst blocks = [];\n\nblocks.push({\n  type: \"section\",\n  text: {\n    type: \"mrkdwn\",\n    text: `✅ *${slackUsername}* (<@${slackUserId}>, ${email}) has marked themselves safe.`\n  }\n});\n\nreturn [{ json: { blocks } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        100
+      ],
+      "id": "0b61cf4c-9897-4a3e-8f49-9d371adfa580",
+      "name": "Reply Message to HR"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0918AFJ2J3",
+          "mode": "id"
+        },
+        "messageType": "block",
+        "blocksUi": "={{ { \"blocks\": $json.blocks } }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        940,
+        100
+      ],
+      "id": "8686db06-b90f-4aed-a248-d3a3eb83b281",
+      "name": "Send Slack message to HR Channel",
+      "webhookId": "73669b94-1ef5-432d-b03a-76317e9d8e93",
+      "credentials": {
+        "slackApi": {
+          "id": "XsNtNr8ZuaiXpMZ1",
+          "name": "Slack API  -Shahar v1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "channelId": {
+          "__rl": true,
+          "value": "={{ $('Parse the Payload').item.json.channel }}",
+          "mode": "id"
+        },
+        "ts": "={{ $('Parse the Payload').item.json.ts }}",
+        "messageType": "block",
+        "blocksUi": "={{ { \"blocks\": $json.blocks } }}",
+        "updateFields": {},
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        940,
+        -120
+      ],
+      "id": "fdfa3b8e-939e-4e5a-94b6-42da98932eb7",
+      "name": "Slack Back the User",
+      "webhookId": "bdd478cc-e186-4ce8-a9f9-91173b4bfbb5",
+      "credentials": {
+        "slackApi": {
+          "id": "XsNtNr8ZuaiXpMZ1",
+          "name": "Slack API  -Shahar v1"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Response from I-am-safe": {
+      "main": [
+        [
+          {
+            "node": "Parse the Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse the Payload": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Reply Message to User",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reply Message to HR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply Message to User": {
+      "main": [
+        [
+          {
+            "node": "Slack Back the User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply Message to HR": {
+      "main": [
+        [
+          {
+            "node": "Send Slack message to HR Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0ceaa9ba-37e4-4eeb-a61b-916c4a673201",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1e0a255e002edd936f91861dcb4555a8e0e2a5cf8ca3b3cddba604da8d42b97d"
+  },
+  "id": "QtGOANXxDUlpmBWN",
+  "tags": []
+}

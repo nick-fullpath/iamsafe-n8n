@@ -1,0 +1,192 @@
+{
+  "name": "IAMSAFE - Manager update flow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1wpzNsN1LaNumKTi_Ny7PzGREPygoPOCo0bygTPZ96kc",
+          "mode": "list",
+          "cachedResultName": "il_adresses",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596691630,
+          "mode": "list",
+          "cachedResultName": "IL_Address_list",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "event": "rowUpdate",
+        "includeInOutput": "both",
+        "options": {
+          "columnsToWatch": [
+            "checkSafeStatus"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8463b777-5678-48ba-aae8-42472be9836f",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "SA3T3kIawBc07dwX",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\n\nitems.forEach(item => {\n  const prevStatus = item.json?.previous?.checkSafeStatus;\n  const currStatus = item.json?.current?.checkSafeStatus;\n\n  let changed = false;\n\n  // Only if we have a previous object\n  if (typeof prevStatus !== 'undefined') {\n    if (prevStatus === true && (currStatus === \"\" || currStatus === false)) {\n      changed = true;\n    }\n  }\n\n  output.push({\n    json: {\n      ...item.json,\n      changed\n    }\n  });\n});\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        0
+      ],
+      "id": "4961cd75-f843-4c91-91fc-347449ea2ad7",
+      "name": "check if status changed from true to false"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        800,
+        160
+      ],
+      "id": "0bcf3790-ecda-4e3c-8679-ce7e0f86f374",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a540114e-afe4-47b0-b7c8-61e85e219de6",
+              "leftValue": "={{ $json.changed }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        540,
+        0
+      ],
+      "id": "16c0e103-6054-4d0a-800f-a31194e10d9b",
+      "name": "is status changed to false?"
+    },
+    {
+      "parameters": {
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "={{ $json.previous.slackUserId }}",
+          "mode": "id"
+        },
+        "text": "You have been reported as safe by HR, No further action required.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        -100
+      ],
+      "id": "6431241f-5060-467b-92f4-b383fe5eb44a",
+      "name": "Slack",
+      "webhookId": "d36466e4-3e22-4ffb-a497-caf1707fca13",
+      "credentials": {
+        "slackApi": {
+          "id": "XsNtNr8ZuaiXpMZ1",
+          "name": "Slack API  -Shahar v1"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "check if status changed from true to false",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "check if status changed from true to false": {
+      "main": [
+        [
+          {
+            "node": "is status changed to false?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "is status changed to false?": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d85e0745-3e7b-4c72-be81-3acbb16f5312",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1e0a255e002edd936f91861dcb4555a8e0e2a5cf8ca3b3cddba604da8d42b97d"
+  },
+  "id": "ioTgYCENZCuj6Hpb",
+  "tags": []
+}

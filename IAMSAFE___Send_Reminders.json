@@ -1,0 +1,186 @@
+{
+  "name": "IAMSAFE - Send Reminders",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1wpzNsN1LaNumKTi_Ny7PzGREPygoPOCo0bygTPZ96kc",
+          "mode": "list",
+          "cachedResultName": "il_adresses",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1596691630,
+          "mode": "list",
+          "cachedResultName": "IL_Address_list",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "checkSafeStatus",
+              "lookupValue": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        0
+      ],
+      "id": "4048ce8f-11d2-49e6-b83d-787e5a9da190",
+      "name": "Get Employees that impacted and not responded",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "rysHCoQLqJVOUfBj",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const blocks = [];\n\nblocks.push({\n  type: \"section\",\n  text: {\n    type: \"mrkdwn\",\n    text: `🚨 *Impacted Employees - Waiting for Safe Confirmation*`\n  }\n});\n\nblocks.push({ type: \"divider\" });\n\nitems.forEach(item => {\n  const name = item.json[\"﻿Display name\"];\n  const city = item.json.City;\n  const dept = item.json.Department;\n  const slackUserId = item.json.slackUserId;\n\n  blocks.push({\n    type: \"section\",\n    text: {\n      type: \"mrkdwn\",\n      text: `• *${name}* (<@${slackUserId}>) — ${city}, ${dept}`\n    }\n  });\n});\n\nreturn [{ json: { blocks } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "id": "cc394ef4-6a3c-4538-b0a3-c702fcc1f7fb",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "Department"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        440,
+        0
+      ],
+      "id": "39d2fbe2-cc24-4f2e-bf58-1d90f94f897b",
+      "name": "Order By department"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C0918AFJ2J3",
+          "mode": "id"
+        },
+        "messageType": "block",
+        "blocksUi": "={{ { \"blocks\": $json.blocks } }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        880,
+        0
+      ],
+      "id": "9f6b67f9-03d2-4bec-97cd-02420c2bfb66",
+      "name": "Slack",
+      "webhookId": "c635c0eb-9f3d-43e9-b8fd-890b41b09e67",
+      "credentials": {
+        "slackApi": {
+          "id": "XsNtNr8ZuaiXpMZ1",
+          "name": "Slack API  -Shahar v1"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f905a19d-6961-4e26-a7f2-08f26f7b6871",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Employees that impacted and not responded": {
+      "main": [
+        [
+          {
+            "node": "Order By department",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order By department": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Employees that impacted and not responded",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7fbd9a5a-db65-4c0a-a420-a36b65c37d27",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1e0a255e002edd936f91861dcb4555a8e0e2a5cf8ca3b3cddba604da8d42b97d"
+  },
+  "id": "9NJhvpKJmAVL0Jgf",
+  "tags": []
+}
