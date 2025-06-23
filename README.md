@@ -1,5 +1,9 @@
 # n8n-iamsafe
 
+<p align="center">
+  <img src="img/main.png" alt="Main Workflow Overview" width="600"/>
+</p>
+
 ## Overview
 
 This repository contains a suite of n8n workflow automations for organizational safety check-ins and emergency response, designed to be easily adapted for any company. The workflows leverage Slack, Google Sheets, and (optionally) OpenAI for automated communication and tracking of employee safety status during emergencies.
@@ -9,6 +13,9 @@ This repository contains a suite of n8n workflow automations for organizational 
 ## Workflows Included
 
 ### 1. IAMSAFE - Main Automation
+
+![Main Automation HR Group](img/hr_group.png)
+
 - **Purpose:** Monitors an RSS feed for emergency events (e.g., rocket attacks), extracts impacted city names, and triggers notifications to employees in those locations.
 - **Key Integrations:**
   - RSS Feed (customizable URL)
@@ -24,18 +31,27 @@ This repository contains a suite of n8n workflow automations for organizational 
   - OpenAI (optional, for city name extraction)
 
 ### 3. IAMSAFE - Send Reminders
+
+![Send Reminders HR Group](img/hr_group_reminder.png)
+
 - **Purpose:** Periodically reminds the HR Channel about employees who have not responded to safety check-ins.
 - **Key Integrations:**
   - Google Sheets (track responses)
   - Slack (reminders)
 
 ### 4. IAMSAFE - Slack i-am-safe
+
+![Slack i-am-safe Notification](img/safe_notification_bot.png)
+
 - **Purpose:** Listens for updates in the Google Sheet and sends Slack check-in messages to employees in impacted areas.
 - **Key Integrations:**
   - Google Sheets (trigger on status change)
   - Slack (direct messages to users)
 
 ### 5. IAMSAFE - Slack Response from User
+
+![Slack Thank You Bot](img/thank_u_bot.png)
+
 - **Purpose:** Handles Slack button responses from employees, updates their status in Google Sheets, and notifies HR.
 - **Key Integrations:**
   - Slack (interactive messages)
