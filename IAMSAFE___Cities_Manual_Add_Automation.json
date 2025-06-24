@@ -168,7 +168,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=Title: {{ $json.cityNames }}",
+        "text": "=Title: {{ $('Change key name').item.json.cityNames }}",
         "hasOutputParser": true,
         "options": {
           "systemMessage": "You are a Hebrew-language RSS title city name extractor.\n\nYour task is:\nTo detect and extract Israeli city names mentioned in the input title.\n\nInput:\nYou will receive a Hebrew RSS title (string).\nThe title may contain:\n\nFull city names (e.g. \"תל אביב\", \"אשדוד\")\nShort initials (e.g. \"ב״ש\", \"ת״א\", \"ר״ג\")\n\nYou must translate common initials into full city names.\nYour output must be exactly in this JSON format:\n{\n  \"cityName\": \"comma-separated list of full city names found, or null if none\"\n}\n\nImportant Rules:\n* Only extract actual city names.\n* Ignore regions (e.g. \"גוש דן\", \"השרון\", \"עוטף עזה\") — do not include these.\n* If the title contains no city names, output cityName: null.\n* If initials are detected, translate them to full city names.\n* The list should be comma-separated, sorted in the order they appear in the title.\n* If the same city appears more than once — list it only once.\n\nCommon initials to translate:\nInitial\tFull Name\nת״א\tתל אביב\nב״ש\tבאר שבע\nר״ג\tרמת גן\nק״ג\tקריית גת\nק״ב\tקריית ביאליק\nק״ש\tקריית שמונה\n\nExamples:\nTitle:\nפגיעה ישירה בבת ים ותל אביב\n{\n  \"cityName\": \"בת ים, תל אביב\"\n}\n\nTitle:\nפגיעה ישירה בגוש דן\n{\n  \"cityName\": null\n}\n\nTitle:\nנפילה בגוש דן וב״ש\n{\n  \"cityName\": \"באר שבע\"\n}\n\nTitle:\nפגיעה ישירה בבית בב״ש, ת״א ור״ג\n{\n  \"cityName\": \"באר שבע, תל אביב, רמת גן\"\n}\n\nTitle:\nאזעקה בלבד בשרון — אין נפילה\n{\n  \"cityName\": null\n}\n\nTitle:\nהאזעקות נמשכות, דיווחים ראשוניים על נפילות בשפלה ובאזור חיפה\n{\n  \"cityName\": \"חיפה\"\n}\n"
@@ -321,8 +321,8 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "Email": "={{ $('Dont send notification for recurring events (minutes)').item.json.Email }}",
-            "checkDateTime": "={{ $json.currentDateTime }}",
+            "Email": "={{ $json.Email }}",
+            "checkDateTime": "={{ $('Get Current Date in a Format').item.json.currentDateTime }}",
             "checkSafeStatus": "true"
           },
           "matchingColumns": [
@@ -409,7 +409,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        3020,
+        2760,
         -500
       ],
       "id": "7cba0c82-20e8-4718-ac9c-452a328d600f",
@@ -495,24 +495,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -500,
-        -20
+        -580,
+        0
       ],
       "id": "0aec55b5-781e-4e02-8b4a-0960f7af4a9a",
       "name": "Change key name"
-    },
-    {
-      "parameters": {
-        "jsCode": "const now = new Date();\nconst formatted = now.toISOString().split('.')[0] + '.000Z';\n\nreturn [\n  {\n    json: {\n      currentDateTime: formatted\n    }\n  }\n];\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2780,
-        -500
-      ],
-      "id": "112c7c0f-5542-4b73-81a4-24b3c81ff3b9",
-      "name": "Get Current Date in a Format"
     },
     {
       "parameters": {
@@ -535,14 +522,14 @@
           "value": "1lHVWNkOPPpzPKQ743rZ4Rr4BhiT2VoYGuzUAwQhA0w4",
           "mode": "list",
           "cachedResultName": "cities",
-          "cachedResultUrl": "YOUR_CITIES_GOOGLE_SHEET"
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "YOUR_CITIES_GOOGLE_SHEET"
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
         },
         "startIndex": "={{ $json.row_number }}"
       },
@@ -586,14 +573,14 @@
           "value": "1lHVWNkOPPpzPKQ743rZ4Rr4BhiT2VoYGuzUAwQhA0w4",
           "mode": "list",
           "cachedResultName": "cities",
-          "cachedResultUrl": "YOUR_CITIES_GOOGLE_SHEET"
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "YOUR_CITIES_GOOGLE_SHEET"
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
         },
         "event": "rowAdded",
         "options": {}
@@ -620,14 +607,14 @@
           "value": "1lHVWNkOPPpzPKQ743rZ4Rr4BhiT2VoYGuzUAwQhA0w4",
           "mode": "list",
           "cachedResultName": "cities",
-          "cachedResultUrl": "YOUR_CITIES_GOOGLE_SHEET"
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "YOUR_CITIES_GOOGLE_SHEET"
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET"
         },
         "filtersUI": {
           "values": [
@@ -653,6 +640,19 @@
           "name": "Google Sheets account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst formatted = now.toISOString().split('.')[0] + '.000Z';\n\nreturn [\n  {\n    json: {\n      currentDateTime: formatted\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -340,
+        0
+      ],
+      "id": "f1e9579b-07cf-44ab-990f-af8b55842044",
+      "name": "Get Current Date in a Format"
     }
   ],
   "pinData": {},
@@ -846,7 +846,7 @@
             "index": 0
           },
           {
-            "node": "Get Current Date in a Format",
+            "node": "Update Impacted Employees",
             "type": "main",
             "index": 0
           }
@@ -864,18 +864,7 @@
       "main": [
         [
           {
-            "node": "AI Agent1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Current Date in a Format": {
-      "main": [
-        [
-          {
-            "node": "Update Impacted Employees",
+            "node": "Get Current Date in a Format",
             "type": "main",
             "index": 0
           }
@@ -942,13 +931,24 @@
           }
         ]
       ]
+    },
+    "Get Current Date in a Format": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": true,
+  "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "04516a23-1240-4f55-854a-16a9e8b884a4",
+  "versionId": "8922aaa9-db03-412f-bd76-d4886fb0b630",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "1e0a255e002edd936f91861dcb4555a8e0e2a5cf8ca3b3cddba604da8d42b97d"
