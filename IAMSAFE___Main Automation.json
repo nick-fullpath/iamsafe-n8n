@@ -15,8 +15,8 @@
       "type": "n8n-nodes-base.rssFeedReadTrigger",
       "typeVersion": 1,
       "position": [
-        -760,
-        0
+        960,
+        -980
       ],
       "id": "9eb3860f-f119-4e71-b15f-f10626185d49",
       "name": "RSS Feed Trigger"
@@ -26,8 +26,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        -260,
-        300
+        1500,
+        -860
       ],
       "id": "7db06b06-d015-44c5-a137-21f0550b5646",
       "name": "No Operation, do nothing"
@@ -37,8 +37,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        700,
-        260
+        2520,
+        -600
       ],
       "id": "e2084841-3ea4-4b1a-9f9c-0611f57670ba",
       "name": "No Operation, do nothing1"
@@ -97,8 +97,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -460,
-        0
+        1260,
+        -980
       ],
       "id": "2fe04ceb-15cb-4872-95fd-8172ff5e4e51",
       "name": "Check if message contains trigger word"
@@ -132,8 +132,8 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        440,
-        -20
+        2280,
+        -620
       ],
       "id": "7aa60121-fd1e-46ce-986d-ec149de29151",
       "name": "check if its Correct message"
@@ -237,8 +237,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2420,
-        200
+        2160,
+        140
       ],
       "id": "0c1a2530-a991-45d4-bd3d-6b7eeca7ca19",
       "name": "create a message for no employee live in the area"
@@ -268,8 +268,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.9,
       "position": [
-        -20,
-        -20
+        1700,
+        -1000
       ],
       "id": "50e4cee1-fd25-4980-937e-95a609fe6413",
       "name": "AI Agent1"
@@ -287,8 +287,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -40,
-        240
+        1700,
+        -720
       ],
       "id": "d3e738ef-9140-4f36-8020-f5de0f28f9f6",
       "name": "OpenAI Chat Model1",
@@ -307,8 +307,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        220,
-        240
+        1900,
+        -740
       ],
       "id": "3f0f5bf4-b355-4a4e-a6b0-99e7487b5cfe",
       "name": "Structured Output Parser1"
@@ -320,7 +320,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        860,
+        880,
         -20
       ],
       "id": "ab29026e-b44a-4f9d-adf8-dd4097ce3d7a",
@@ -355,8 +355,8 @@
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        3560,
-        280
+        3340,
+        240
       ],
       "id": "df07dc76-626c-4b90-a12f-6104b24e4a9d",
       "name": "No Operation, do nothing3"
@@ -379,8 +379,8 @@
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.3,
       "position": [
-        3220,
-        0
+        3140,
+        100
       ],
       "id": "a4400403-7f30-4cae-9bfe-073e9f2cc3a0",
       "name": "Slack Channel",
@@ -413,7 +413,7 @@
           "mappingMode": "defineBelow",
           "value": {
             "Email": "={{ $('Dont send notification for recurring events (minutes)').item.json.Email }}",
-            "checkDateTime": "={{ $json.currentDateTime }}",
+            "checkDateTime": "={{ $('RSS Feed Trigger').item.json.isoDate }}",
             "checkSafeStatus": "true"
           },
           "matchingColumns": [
@@ -500,7 +500,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
       "position": [
-        3020,
+        2780,
         -500
       ],
       "id": "aa361042-44a2-4dcc-9cf4-d0589d3e625f",
@@ -578,19 +578,6 @@
       ],
       "id": "c0d9ee3b-4f7b-4b0f-837e-8135cf36d209",
       "name": "Dont send notification for recurring events (minutes)"
-    },
-    {
-      "parameters": {
-        "jsCode": "const now = new Date();\nconst formatted = now.toISOString().split('.')[0] + '.000Z';\n\nreturn [\n  {\n    json: {\n      currentDateTime: formatted\n    }\n  }\n];\n"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        2780,
-        -500
-      ],
-      "id": "aee271ac-0631-4c68-aa79-dbaa78ffe10e",
-      "name": "Get Current Date in a Format"
     }
   ],
   "pinData": {},
@@ -813,7 +800,7 @@
             "index": 0
           },
           {
-            "node": "Get Current Date in a Format",
+            "node": "Update Impacted Employees",
             "type": "main",
             "index": 0
           }
@@ -821,17 +808,6 @@
         [
           {
             "node": "No Operation, do nothing4",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get Current Date in a Format": {
-      "main": [
-        [
-          {
-            "node": "Update Impacted Employees",
             "type": "main",
             "index": 0
           }
@@ -848,7 +824,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "81c1f7a5-35b4-421d-9cf3-7c6d04135a8b",
+  "versionId": "293fd27e-8f92-4927-be2e-fc749b9999d9",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "1e0a255e002edd936f91861dcb4555a8e0e2a5cf8ca3b3cddba604da8d42b97d"
